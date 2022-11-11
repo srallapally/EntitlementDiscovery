@@ -11,6 +11,9 @@ import net.sf.json.groovy.JsonSlurper
 
 import wslite.rest.*
 
+/**
+ *
+ */
 class EntitlementDiscovery {
     String OPENIDMUSER = null
     String OPENDIDMPASSWORD = null
@@ -23,10 +26,24 @@ class EntitlementDiscovery {
     String appObjectName = null
     String IDMURL = null
     RESTClient client = null
-    static String assignmentPath = "/managed/assignment"
+    static String assignmentPath = "/managed/assignment?_fields=_id"
     static String rolePath = "/managed/role?_fields=_id"
+    static String createRolePath = "/managed/role?action=create"
     def jsonSlurper = new JsonSlurper()
 
+    /**
+     *
+     * @param baseURL
+     * @param uid
+     * @param pwd
+     * @param app
+     * @param appobject
+     * @param nativeattr
+     * @param mapping
+     * @param role
+     * @param assignment
+     * @return
+     */
     def init(String baseURL, String uid,String pwd, String app,String appobject,String nativeattr,String mapping,boolean role,boolean assignment){
         IDMURL = baseURL
         OPENIDMUSER = uid
@@ -42,7 +59,9 @@ class EntitlementDiscovery {
 
         println "Inited"
     }
-
+    /**
+    *
+    */
     def processEntitlements(){
         def entpath = "/system/"+appName+"/"+appObjectName+"?_queryFilter=true&_pageSize=10&_totalPagedResultsPolicy=EXACT"
         println entpath
@@ -60,18 +79,24 @@ class EntitlementDiscovery {
                     .flatten()
                     .collect { [it._id, it.dn, it.samAccountName] }
             result.each {
-                def roleName = it[2].toString()
-                def roleDesc = it[1].toString()
+                def roleName = it[1].toString()
+                def roleDesc = it[2].toString()
                 def roleType = "Entitlement"
                 if (createrole) {
                     def newrole = createRole(roleName, roleDesc, roleType)
                 } else {
                     println roleName
+                    println roleDesc
                 }
             }
         } while (pgCookie != null)
     }
-
+    /**
+     *
+     * @param epath
+     * @param pageCookie
+     * @return
+     */
     def getObjects(String epath,String pageCookie){
         // println path
         if(pageCookie != null){
@@ -98,14 +123,16 @@ class EntitlementDiscovery {
             type ContentType.JSON
             json name: roleName,
                     description: roleDescription,
-                    type: roleType,
+                    roletype: roleType,
                     appname:appName,
                     attribute: nativeAttribute,
                     objectname: appObjectName
         }
         def roleid = response.json._id
         if(createassignment){
-            createAssignment(roleid, roleName, roleDescription)
+            createAssignment(roleid, roleDescription,roleName)
+        } else {
+            println roleName
         }
         return roleid
     }
@@ -142,7 +169,10 @@ class EntitlementDiscovery {
                     ]
         }
     }
-
+    /**
+     * 
+     * @return
+     */
     def boolean validate (){
         return true
     }
