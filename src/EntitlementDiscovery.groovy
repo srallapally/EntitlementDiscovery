@@ -1,15 +1,43 @@
 package com.forgerock.governance
 /**
+ * Groovy script that takes non-account object type values and creates
+ * a Role-Assignment combo in IDM that represents an Entitlement
  *
+ * TODO
+ * a. Handle update Role and update Assignment
+ * b. Handle delete Role and delete assignment
+ *
+ * 11/13/2022   Added logback/ slf4j for logging
  */
+
+import net.sf.json.JSONNull
+import net.sf.json.groovy.JsonSlurper
 @Grapes(
         @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1')
 )
 @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.3')
-import net.sf.json.JSONNull
-import net.sf.json.groovy.JsonSlurper
+@Grapes([
+        @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1'),
+        @Grab(group='ch.qos.logback', module='logback-classic', version='0.9.28')
+])
 
-import wslite.rest.*
+import org.slf4j.*
+@Grapes(
+        @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1')
+)
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.3')
+@Grapes([
+        @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1'),
+        @Grab(group='ch.qos.logback', module='logback-classic', version='0.9.28')
+])
+
+import org.slf4j.*
+/**
+ *
+ */
+
+import wslite.rest.ContentType
+import wslite.rest.RESTClient
 
 /**
  *
@@ -57,13 +85,14 @@ class EntitlementDiscovery {
         client = new RESTClient(IDMURL)
         client.httpClient.sslTrustAllCerts = true
 
-        println "Inited"
+        log.info "Inited"
     }
     /**
     *
     */
     def processEntitlements(){
         def entpath = "/system/"+appName+"/"+appObjectName+"?_queryFilter=true&_pageSize=10&_totalPagedResultsPolicy=EXACT"
+        log.info entpath
         println entpath
         do {
             def res = getObjects(entpath,pgCookie)
@@ -85,8 +114,8 @@ class EntitlementDiscovery {
                 if (createrole) {
                     def newrole = createRole(roleName, roleDesc, roleType)
                 } else {
-                    println roleName
-                    println roleDesc
+                    log.info roleName
+                    log.info roleDesc
                 }
             }
         } while (pgCookie != null)
@@ -129,10 +158,11 @@ class EntitlementDiscovery {
                     objectname: appObjectName
         }
         def roleid = response.json._id
+        log.info roleid
         if(createassignment){
             createAssignment(roleid, roleDescription,roleName)
         } else {
-            println roleName
+            log.info roleName
         }
         return roleid
     }
