@@ -10,32 +10,17 @@ package com.forgerock.governance
  * 11/13/2022   Added logback/ slf4j for logging
  */
 
+
+@Grapes([
+        @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1'),
+        @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.3'),
+        @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1'),
+        @Grab(group='ch.qos.logback', module='logback-classic', version='0.9.28')
+])
 import net.sf.json.JSONNull
 import net.sf.json.groovy.JsonSlurper
-@Grapes(
-        @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1')
-)
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.3')
-@Grapes([
-        @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1'),
-        @Grab(group='ch.qos.logback', module='logback-classic', version='0.9.28')
-])
 
 import org.slf4j.*
-@Grapes(
-        @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1')
-)
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.3')
-@Grapes([
-        @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1'),
-        @Grab(group='ch.qos.logback', module='logback-classic', version='0.9.28')
-])
-
-import org.slf4j.*
-/**
- *
- */
-
 import wslite.rest.ContentType
 import wslite.rest.RESTClient
 
